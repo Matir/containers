@@ -4,11 +4,10 @@ RUN apt-get update && \
   apt-get -yy install cargo nodejs git python3 sudo build-essential libbz2-dev \
   liblzma-dev npm golang
 
-RUN git clone https://github.com/facebook/watchman.git /tmp/watchman
+RUN /bin/bash -c "NONINTERACTIVE=1 $(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 
-WORKDIR /tmp/watchman
-RUN ./install-system-packages.sh
-RUN sh -c "PREFIX=/opt/watchman ./autogen.sh"
+RUN brew install watchman
 
 ARG USERNAME=node
 RUN groupadd --gid 1001 ${USERNAME} \
