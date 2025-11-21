@@ -56,11 +56,23 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get named tag
+        id: namedtag
+        shell: bash
+        run: |
+          echo "namedtag=$(cat ./${{ matrix.image }}/.tag 2>/dev/null || true)" >> $GITHUB_OUTPUT
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@8d8c7c12f7b958582a5cb82ba16d5903cb27976a
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.namedtag.outputs.namedtag }},enable=${{ steps.namedtag.outputs.namedtag != '' }}
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@9e436ba9f2d7bcd1d038c8e55d039d37896ddc5d
@@ -70,7 +82,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
