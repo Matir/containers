@@ -4,15 +4,6 @@ RUN apt-get update && \
   apt-get -yy install cargo nodejs git python3 sudo build-essential libbz2-dev \
   liblzma-dev npm golang curl sudo
 
-ARG BREW_USERNAME=linuxbrew
-RUN groupadd --gid 1002 ${BREW_USERNAME} \
-  && useradd --uid 1002 --gid ${BREW_USERNAME} --shell /bin/bash --create-home ${BREW_USERNAME}
-
-RUN /bin/bash -o pipefail -c "curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | su - linuxbrew sh -c \"NONINTERACTIVE=1 /bin/bash\""
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
-
-RUN su - linuxbrew /bin/bash -c "CI=1 /home/linuxbrew/.linuxbrew/bin/brew install watchman 0<&-"
-
 ARG USERNAME=node
 RUN groupadd --gid 1001 ${USERNAME} \
   && useradd --uid 1001 --gid ${USERNAME} --shell /bin/bash --create-home ${USERNAME}
