@@ -11,7 +11,7 @@ RUN groupadd --gid 1002 ${BREW_USERNAME} \
 RUN /bin/bash -o pipefail -c "curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | su - linuxbrew sh -c \"NONINTERACTIVE=1 /bin/bash\""
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 
-RUN su - linuxbrew /bin/bash -c "/home/linuxbrew/.linuxbrew/bin/brew install watchman"
+RUN su - linuxbrew /bin/bash -c "CI=1 /home/linuxbrew/.linuxbrew/bin/brew install watchman 0<&-"
 
 ARG USERNAME=node
 RUN groupadd --gid 1001 ${USERNAME} \
