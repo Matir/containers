@@ -3,31 +3,60 @@ name: Create and publish a Docker image
 on:
   push:
     branches: ['main']
+  pull_request:
+    branches: ['main']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
   IMAGE_BASE_NAME: ${{ github.repository }}
 
 jobs:
-  # This job finds all subdirectories containing a Dockerfile and creates a JSON array of their names.
-  # This output is then used by the `build-and-push-image` job to dynamically generate a build matrix.
+  # This job finds all subdirectories containing a Dockerfile and filters to only changed images for PRs.
   list-images:
     runs-on: ubuntu-latest
     outputs:
-      images: ${{ steps.list-images.outputs.images }}
+      images: ${{ steps.changed-images.outputs.images }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: list images
-        id: list-images
+        with:
+          fetch-depth: 0  # Needed for git diff
+      - name: Detect changed images
+        id: changed-images
         run: |
-          images=$(
-            find * -maxdepth 1 -name Dockerfile -print0 \
-            | xargs -0 -n1 dirname \
-            | jq -R . \
-            | jq -cs .
-          )
-          echo "images=${images}" >> $GITHUB_OUTPUT
+          # Get list of all directories with Dockerfiles
+          all_images=$(find * -maxdepth 1 -name Dockerfile -print0 | xargs -0 -n1 dirname | jq -R . | jq -cs .)
+          echo "All images: ${all_images}"
+          
+          if [[ '${{ github.event_name }}' == 'pull_request' ]]; then
+            # For PRs, find images with changed files in their directories
+            base_ref='${{ github.base_ref }}'
+            head_ref='${{ github.head_ref }}'
+            echo "Comparing ${head_ref} against ${base_ref}"
+            
+            # Get changed files compared to base branch
+            changed_files=$(git diff --name-only "origin/${base_ref}"...HEAD 2>/dev/null || git diff --name-only "${base_ref}"...HEAD 2>/dev/null || echo "")
+            echo "Changed files: ${changed_files}"
+            
+            # Find images in changed directories
+            changed_images=$(echo "${changed_files}" | grep -o '^[^/]*' | sort -u | jq -R . | jq -cs . 2>/dev/null || echo "[]")
+            echo "Changed images: ${changed_images}"
+            
+            # If no changes or all images changed, build all
+            if [[ -z "${changed_files}" ]] || [[ "${changed_images}" == '[]' ]]; then
+              echo "No specific image changes detected, building all images"
+              echo "images=${all_images}" >> $GITHUB_OUTPUT
+            else
+              echo "images=${changed_images}" >> $GITHUB_OUTPUT
+            fi
+          else
+            # For push to main, build all images
+            echo "images=${all_images}" >> $GITHUB_OUTPUT
+          fi
 
   # This job builds and pushes a container image for each of the directories found by the `list-images` job.
   build-and-push-image:
@@ -51,6 +80,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
       - name: Log in to the Container registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@3227f5311cb93ffd14d13e65d8cc400d30f4dd8a
         with:
           registry: ${{ env.REGISTRY }}
@@ -74,17 +104,21 @@ jobs:
             type=ref,event=tag
             type=ref,event=pr
       - name: Build and push Docker image
-        id: push
+        id: build-push
         uses: docker/build-push-action@8c1e8f8e5bf845ba3773a14f3967965548a2341e
         with:
           context: ${{ matrix.image }}
-          push: true
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Generate artifact attestation
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/attest-build-provenance@v3
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}/${{ matrix.image }}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.build-push.outputs.digest }}
           push-to-registry: true
