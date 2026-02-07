@@ -6,7 +6,8 @@ RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   zsh git vim build-essential procps lldb gdb python3 net-tools strace \
   jq curl ripgrep gnupg ca-certificates pkg-config less sudo locales \
-  git-lfs && \
+  git-lfs bash-completion && \
+  curl -sS https://starship.rs/install.sh | sh -s -- -y && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
@@ -37,5 +38,6 @@ RUN groupadd -g ${GID} ${USERNAME} \
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 COPY bashrc .bashrc
+COPY zshrc .zshrc
 
 ENTRYPOINT ["/bin/bash"]

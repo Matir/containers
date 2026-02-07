@@ -84,3 +84,7 @@ fi
 if [ -x /usr/local/bin/mise ] ; then
   eval "$(/usr/local/bin/mise activate bash)"
 fi
+
+if [ -x /usr/local/bin/starship ] ; then
+  eval "$(/usr/local/bin/starship init bash)"
+fi
