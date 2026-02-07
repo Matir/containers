@@ -1,0 +1,32 @@
+# Zsh configuration for devbase
+
+# Set up history
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
+
+# Basic completion
+autoload -Uz compinit
+compinit
+
+# Key bindings
+bindkey -e
+
+# Aliases
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+
+# Initialize mise
+if [ -x /usr/local/bin/mise ] ; then
+  eval "$(/usr/local/bin/mise activate zsh)"
+fi
+
+# Initialize starship prompt
+if [ -x /usr/local/bin/starship ] ; then
+  eval "$(/usr/local/bin/starship init zsh)"
+fi
