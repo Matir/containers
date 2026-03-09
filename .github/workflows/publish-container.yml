@@ -75,7 +75,7 @@ jobs:
     steps:
       # These steps set up QEMU and Buildx to enable multi-platform builds.
       - name: Setup qemu
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: Setup buildx
         uses: docker/setup-buildx-action@v3
       - name: Checkout repository
