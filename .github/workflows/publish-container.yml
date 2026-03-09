@@ -94,7 +94,7 @@ jobs:
           echo "namedtag=$(cat ./${{ matrix.image }}/.tag 2>/dev/null || true)" >> $GITHUB_OUTPUT
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@a60f0f62b5c12316066c8db464bfb2faafd7907b
+        uses: docker/metadata-action@b13d25e5fcf2e04305d8aedc9a6c28ebe258e934
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}/${{ matrix.image }}
           tags: |
