@@ -46,7 +46,7 @@ if [ "$(docker inspect -f '{{.State.Running}}' ${CONTAINER_NAME} 2>/dev/null)" =
         COMMAND=("zsh")
     fi
     echo "Executing: ${COMMAND[*]}"
-    docker exec -it "${CONTAINER_NAME}" "${COMMAND[@]}"
+    docker exec -it -e TERM="$TERM" "${CONTAINER_NAME}" "${COMMAND[@]}"
 else
     # Remove the container if it exists but is not running (to apply new mounts/configs)
     if [ "$(docker ps -aq -f name=${CONTAINER_NAME})" ]; then
@@ -73,11 +73,17 @@ else
 
     echo "Command: ${COMMAND[*]}"
 
+    # Use a named volume for the home directory to persist state (history, tools, etc.)
+    # We default to 'matir' to match the Dockerfile/entrypoint defaults
+    VOLUME_NAME="kali-home-persistence"
+
     docker run "${DOCKER_OPTS[@]}" \
         --name "${CONTAINER_NAME}" \
         --network "${NETWORK_MODE}" \
         -e HOST_UID="$(id -u)" \
         -e HOST_GID="$(id -g)" \
+        -e TERM="$TERM" \
+        -v "${VOLUME_NAME}:/home/matir" \
         -v "${WORKSPACE_DIR}:/workspace" \
         -w /workspace \
         "${IMAGE_NAME}" \

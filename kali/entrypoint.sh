@@ -22,7 +22,8 @@ fi
 
 # Sync the home directory if it's new (copies .zshrc from /etc/skel)
 cp -n /etc/skel/.zshrc "/home/$USER_NAME/.zshrc" 2>/dev/null
-chown "$USER_ID:$GROUP_ID" "/home/$USER_NAME/.zshrc" 2>/dev/null
+
+chown -R "$USER_ID:$GROUP_ID" "/home/$USER_NAME" 2>/dev/null
 
 # Execute the passed command (e.g., zsh) as the mapped user
 export HOME="/home/$USER_NAME"
