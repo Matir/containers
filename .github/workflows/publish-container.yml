@@ -85,7 +85,7 @@ jobs:
         uses: actions/checkout@v6
       - name: Log in to the Container registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/login-action@3227f5311cb93ffd14d13e65d8cc400d30f4dd8a
+        uses: docker/login-action@5c42dd293b89d96bae168b5b3694e4e72a5b1117
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
