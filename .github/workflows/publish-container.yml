@@ -29,23 +29,26 @@ jobs:
         id: changed-images
         run: |
           # Get list of all directories with Dockerfiles
-          all_images=$(find * -maxdepth 1 -name Dockerfile -print0 | xargs -0 -n1 dirname | jq -R . | jq -cs .)
+          all_images=$(find * -maxdepth 1 -name Dockerfile -print0 | xargs -0 -n1 dirname | grep -v '^\.' | jq -R . | jq -cs .)
           echo "All images: ${all_images}"
-          
+
           if [[ '${{ github.event_name }}' == 'pull_request' ]]; then
             # For PRs, find images with changed files in their directories
             base_ref='${{ github.base_ref }}'
             head_ref='${{ github.head_ref }}'
             echo "Comparing ${head_ref} against ${base_ref}"
-            
+
             # Get changed files compared to base branch
             changed_files=$(git diff --name-only "origin/${base_ref}"...HEAD 2>/dev/null || git diff --name-only "${base_ref}"...HEAD 2>/dev/null || echo "")
             echo "Changed files: ${changed_files}"
-            
-            # Find images in changed directories
-            changed_images=$(echo "${changed_files}" | grep -o '^[^/]*' | sort -u | jq -R . | jq -cs . 2>/dev/null || echo "[]")
+
+            # Find images in changed directories, intersected with all_images to exclude
+            # dotfiles and directories without a Dockerfile
+            changed_dirs=$(echo "${changed_files}" | grep -o '^[^/]*' | sort -u | jq -R . | jq -cs . 2>/dev/null || echo "[]")
+            changed_images=$(jq -n --argjson all "${all_images}" --argjson changed "${changed_dirs}" \
+              '$changed | map(select(. as $x | $all | index($x)))')
             echo "Changed images: ${changed_images}"
-            
+
             # If no changes or all images changed, build all
             if [[ -z "${changed_files}" ]] || [[ "${changed_images}" == '[]' ]]; then
               echo "No specific image changes detected, building all images"

@@ -1,12 +1,15 @@
-FROM ubuntu:latest
+FROM ubuntu:24.04
 
 RUN apt-get update && \
-  apt-get -yy install cargo nodejs git python3 sudo build-essential libbz2-dev \
-  liblzma-dev npm golang curl sudo
+  apt-get -yy install --no-install-recommends nodejs git python3 sudo build-essential \
+  npm golang curl \
+  && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=node
 RUN groupadd --gid 1001 ${USERNAME} \
-  && useradd --uid 1001 --gid ${USERNAME} --shell /bin/bash --create-home ${USERNAME}
+  && useradd --uid 1001 --gid ${USERNAME} --shell /bin/bash --create-home ${USERNAME} \
+  && echo "${USERNAME} ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} \
+  && chmod 0440 /etc/sudoers.d/${USERNAME}
 
 ARG NPM_GLOBAL=/usr/local/share/npm-global
 
@@ -33,4 +36,8 @@ ARG NODE_MODULES="tslint-to-eslint-config typescript"
 RUN su ${USERNAME} -c "umask 0002 && npm install -g ${NODE_MODULES}" \
     && npm cache clean --force > /dev/null 2>&1
 
-RUN su ${USERNAME} -c "go install golang.org/x/mobile/cmd/gomobile@latest"
+RUN su ${USERNAME} -c "go install golang.org/x/mobile/cmd/gomobile@latest \
+    && $(go env GOPATH)/bin/gomobile init"
+
+WORKDIR /workspace
+USER ${USERNAME}

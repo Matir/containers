@@ -52,6 +52,9 @@ RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
 # Install gemini-cli, opencode, and kilocode via npm
 RUN npm install -g @google/gemini-cli opencode-ai @kilocode/cli
 
+# Install other tools
+RUN r2pm -U && r2pm -i r2mcp
+
 # Configure zsh template for new users (/etc/skel)
 RUN touch /etc/skel/.zshrc && \
     echo 'eval "$(starship init zsh)"' >> /etc/skel/.zshrc && \
