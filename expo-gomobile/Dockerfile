@@ -4,7 +4,7 @@ FROM ubuntu:24.04
 RUN apt-get update && \
     apt-get -yy install --no-install-recommends \
     git git-lfs python3 sudo build-essential \
-    golang curl ca-certificates openjdk-17-jdk-headless unzip \
+    golang curl ca-certificates openjdk-17-jdk-headless unzip adb \
     && curl -fsSL https://raw.githubusercontent.com/tj/n/master/bin/n | bash -s 24 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -35,7 +35,7 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
     && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
     && rm /tmp/cmdline-tools.zip \
     && yes | sdkmanager --licenses \
-    && sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;${NDK_VERSION}" \
+    && sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;${NDK_VERSION}" \
     && chown -R ${USERNAME}: ${ANDROID_HOME}
 
 # Optimized NPM Configuration and Global Installs
