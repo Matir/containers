@@ -83,6 +83,12 @@ jobs:
         uses: docker/setup-buildx-action@v4
       - name: Checkout repository
         uses: actions/checkout@v6
+      - name: Install Syft
+        run: |
+          mkdir -p ${{ github.workspace }}/bin
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b ${{ github.workspace }}/bin
+          echo "${{ github.workspace }}/bin" >> $GITHUB_PATH
+
       - name: Log in to the Container registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@3227f5311cb93ffd14d13e65d8cc400d30f4dd8a
@@ -113,11 +119,16 @@ jobs:
         with:
           context: ${{ matrix.image }}
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          load: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Generate SBOM
+        run: |
+          FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+          .github/scripts/generate-sbom.sh "${FIRST_TAG}"
       - name: Generate artifact attestation
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/attest-build-provenance@v3

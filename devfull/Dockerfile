@@ -1,6 +1,7 @@
 FROM ghcr.io/matir/containers/devbase:latest
 
-LABEL maintainer="Matir <matir@users.noreply.github.com>"
+LABEL maintainer="Matir <matir@users.noreply.github.com>" \
+      org.opencontainers.image.base.name="ghcr.io/matir/containers/devbase:latest"
 
 USER root
 
