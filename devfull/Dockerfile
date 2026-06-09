@@ -19,8 +19,10 @@ RUN apt-get update && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bookworm stable" | tee /etc/apt/sources.list.d/docker.list && \
     # Helm
-    curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /etc/apt/keyrings/helm.gpg > /dev/null && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list && \
+    curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor -o /usr/share/keyrings/helm.gpg && \
+    test "$(gpg --show-keys --with-colons "/usr/share/keyrings/helm.gpg" | awk -F: '$1 == "fpr" {print $10}' | head -n 1)" = "DDF78C3E6EBB2D2CC223C95C62BA89D07698DBC6" && \
+    echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" > /etc/apt/sources.list.d/helm.list &&\
+    chmod 644 /etc/apt/keyrings/* && chmod 644 /etc/apt/sources.list.d/* && \
     # Install packages
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -32,9 +34,11 @@ RUN apt-get update && \
     nodejs \
     npm \
     fish && \
-    npm install -g @google/gemini-cli @anthropic-ai/claude-code && \
+    npm install -g @anthropic-ai/claude-code && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- -d /usr/local/bin
 
 USER dev
 RUN mkdir -p /home/dev/.config/fish

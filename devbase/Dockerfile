@@ -1,6 +1,8 @@
 FROM docker.io/library/debian:trixie-slim
 
-LABEL maintainer="Matir <matir@users.noreply.github.com>"
+LABEL maintainer="Matir <matir@users.noreply.github.com>" \
+      org.opencontainers.image.authors="Matir <matir@users.noreply.github.com>" \
+      org.opencontainers.image.base.name="docker.io/library/debian:trixie-slim"
 
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
