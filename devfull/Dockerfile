@@ -1,7 +1,7 @@
 FROM ghcr.io/matir/containers/devbase:latest
 
 LABEL maintainer="Matir <matir@users.noreply.github.com>" \
-      org.opencontainers.image.base.name="ghcr.io/matir/containers/devbase:latest"
+      org.opencontainers.image.base.name="docker.io/library/debian:trixie-slim"
 
 USER root
 
@@ -27,6 +27,12 @@ RUN apt-get update && \
     # Install packages
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    clang-format \
+    shellcheck \
+    ripgrep \
+    strace \
+    jq fq jqp xq yq \
+    git-lfs \
     google-cloud-cli \
     google-cloud-cli-gke-gcloud-auth-plugin \
     kubectl \
