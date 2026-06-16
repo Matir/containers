@@ -1,0 +1,38 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+HISTCONTROL=ignoreboth
+shopt -s histappend
+HISTSIZE=50000
+HISTFILESIZE=100000
+shopt -s checkwinsize
+
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+alias ls='eza --group-directories-first'
+alias ll='eza -la --group-directories-first'
+alias lt='eza --tree'
+alias grep='grep --color=auto'
+alias cat='batcat --paging=never'
+alias bat='batcat'
+alias fd='fdfind'
+
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# fzf key bindings
+[[ -f /usr/share/doc/fzf/examples/key-bindings.bash ]] && \
+    source /usr/share/doc/fzf/examples/key-bindings.bash
+
+[[ -x /usr/local/bin/mise ]] && eval "$(/usr/local/bin/mise activate bash)"
+command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
+command -v direnv &>/dev/null && eval "$(direnv hook bash)"
+[[ -x /usr/local/bin/starship ]] && eval "$(/usr/local/bin/starship init bash)"
