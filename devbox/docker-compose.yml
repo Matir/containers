@@ -1,0 +1,13 @@
+services:
+  devbox:
+    image: ghcr.io/matir/containers/devbox:latest
+    network_mode: host
+    stdin_open: true
+    tty: true
+    volumes:
+      - matir-home:/home/matir
+      - ${PWD}:/workspace
+
+# Named volumes persist across `docker compose down`; only removed with `docker compose down -v`.
+volumes:
+  matir-home:
