@@ -22,7 +22,7 @@ jobs:
       images: ${{ steps.changed-images.outputs.images }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0  # Needed for git diff
       - name: Detect changed images
@@ -82,7 +82,7 @@ jobs:
       - name: Setup buildx
         uses: docker/setup-buildx-action@v4
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Syft
         run: |
           mkdir -p ${{ github.workspace }}/bin
