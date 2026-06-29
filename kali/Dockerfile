@@ -32,6 +32,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fzf \
     nuclei \
     gosu \
+    build-essential \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
 
 # Add symlinks for common tools that might have different names in Debian/Ubuntu
