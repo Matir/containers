@@ -29,9 +29,9 @@ RUN apt-get update && \
     # Build tools
     build-essential python3 python3-pip python3-venv pipx \
     # Debugging
-    procps lldb gdb strace \
+    procps lldb gdb strace ltrace lsof \
     # Networking
-    net-tools iputils-ping iproute2 dnsutils netcat-openbsd \
+    net-tools iputils-ping iproute2 dnsutils netcat-openbsd tcpdump \
     # Terminal multiplexer
     tmux \
     # Modern CLI replacements
@@ -47,6 +47,12 @@ RUN apt-get update && \
     # Dev tools
     shellcheck clang-format gh \
     nodejs npm \
+    # HTTP clients
+    httpie xh \
+    # File watcher
+    watchexec \
+    # Intercepting proxy
+    mitmproxy \
     # Man pages
     man-db manpages-dev \
     # Container client
