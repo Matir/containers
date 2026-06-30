@@ -45,7 +45,7 @@ jobs:
             # Find images in changed directories, intersected with all_images to exclude
             # dotfiles and directories without a Dockerfile
             changed_dirs=$(echo "${changed_files}" | grep -o '^[^/]*' | sort -u | jq -R . | jq -cs . 2>/dev/null || echo "[]")
-            changed_images=$(jq -n --argjson all "${all_images}" --argjson changed "${changed_dirs}" \
+            changed_images=$(jq -nc --argjson all "${all_images}" --argjson changed "${changed_dirs}" \
               '$changed | map(select(. as $x | $all | index($x)))')
             echo "Changed images: ${changed_images}"
 
