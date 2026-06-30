@@ -49,8 +49,6 @@ RUN apt-get update && \
     nodejs npm \
     # HTTP clients
     httpie xh \
-    # File watcher
-    watchexec \
     # Intercepting proxy
     mitmproxy \
     # Man pages
@@ -62,6 +60,22 @@ RUN apt-get update && \
     curl -sS https://starship.rs/install.sh | sh -s -- -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Install watchexec (not packaged in Debian)
+ARG WATCHEXEC_VERSION=2.5.1
+ARG WATCHEXEC_SHA256_AMD64=9bf40f223b3651e59c99ed463c44635fa71ab3f81b69927b5343b3935a4fdb14
+ARG WATCHEXEC_SHA256_ARM64=ce125d1e4c86e69e1e088bf1cfc5db68d74d0bb933dc4555ae727bab49dc62ca
+RUN ARCH="$(dpkg --print-architecture)" && \
+    case "${ARCH}" in \
+      amd64) WX_TARGET=x86_64-unknown-linux-gnu; WX_SHA256="${WATCHEXEC_SHA256_AMD64}" ;; \
+      arm64) WX_TARGET=aarch64-unknown-linux-gnu; WX_SHA256="${WATCHEXEC_SHA256_ARM64}" ;; \
+      *) echo "Unsupported architecture: ${ARCH}" >&2; exit 1 ;; \
+    esac && \
+    WX_DEB="watchexec-${WATCHEXEC_VERSION}-${WX_TARGET}.deb" && \
+    curl -fsSLO "https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/${WX_DEB}" && \
+    echo "${WX_SHA256}  ${WX_DEB}" | sha256sum -c - && \
+    dpkg -i "${WX_DEB}" && \
+    rm "${WX_DEB}"
 
 RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && locale-gen
