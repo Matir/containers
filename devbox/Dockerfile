@@ -55,8 +55,6 @@ RUN apt-get update && \
     hyperfine \
     # HTTP clients
     httpie xh \
-    # Intercepting proxy
-    mitmproxy \
     # Man pages
     man-db manpages-dev \
     # Container client
@@ -67,6 +65,14 @@ RUN apt-get update && \
     gosu && \
     npm install -g @anthropic-ai/claude-code && \
     curl -sS https://starship.rs/install.sh | sh -s -- -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install mitmproxy from testing (not yet in trixie/stable)
+RUN echo "deb http://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/debian-testing.list && \
+    printf 'Package: *\nPin: release a=testing\nPin-Priority: 100\n' > /etc/apt/preferences.d/testing-pin && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -t testing mitmproxy && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
