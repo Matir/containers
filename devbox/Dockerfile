@@ -31,11 +31,13 @@ RUN apt-get update && \
     file zip unzip rsync \
     openssh-client \
     # Build tools
-    build-essential python3 python3-pip python3-venv pipx \
+    build-essential binutils python3 python3-pip python3-venv pipx \
+    # Language toolchains
+    golang-go cargo \
     # Debugging
-    procps lldb gdb strace ltrace lsof \
+    procps lldb gdb strace ltrace lsof valgrind \
     # Networking
-    net-tools iputils-ping iproute2 dnsutils netcat-openbsd tcpdump \
+    net-tools iputils-ping iproute2 dnsutils netcat-openbsd tcpdump socat nmap \
     # Terminal multiplexer
     tmux \
     # Modern CLI replacements
@@ -49,7 +51,7 @@ RUN apt-get update && \
     # Data tools
     jq fq jqp xq yq \
     # Dev tools
-    shellcheck clang-format gh \
+    shellcheck clang-format gh glow \
     nodejs npm \
     # Benchmarking
     hyperfine \
