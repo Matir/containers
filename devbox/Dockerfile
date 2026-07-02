@@ -68,7 +68,6 @@ RUN apt-get update && \
     # Privilege drop helper for entrypoint
     gosu && \
     npm install -g @anthropic-ai/claude-code && \
-    pip install --no-cache-dir --break-system-packages pwntools && \
     curl -sS https://starship.rs/install.sh | sh -s -- -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
