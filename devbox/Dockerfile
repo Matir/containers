@@ -31,7 +31,8 @@ RUN apt-get update && \
     file zip unzip rsync \
     openssh-client \
     # Build tools
-    build-essential binutils python3 python3-pip python3-venv pipx \
+    build-essential binutils python3 python3-dev python3-pip python3-venv pipx \
+    libssl-dev libffi-dev \
     # Language toolchains
     golang-go cargo \
     # Debugging
