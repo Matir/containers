@@ -35,7 +35,9 @@ RUN apt-get update && \
     # Language toolchains
     golang-go cargo \
     # Debugging
-    procps lldb gdb strace ltrace lsof valgrind \
+    procps lldb gdb gdb-multiarch strace ltrace lsof valgrind \
+    # Reverse engineering / exploit development
+    radare2 patchelf python3-ropgadget \
     # Networking
     net-tools iputils-ping iproute2 dnsutils netcat-openbsd tcpdump socat nmap \
     # Terminal multiplexer
@@ -66,6 +68,7 @@ RUN apt-get update && \
     # Privilege drop helper for entrypoint
     gosu && \
     npm install -g @anthropic-ai/claude-code && \
+    pip install --no-cache-dir --break-system-packages pwntools && \
     curl -sS https://starship.rs/install.sh | sh -s -- -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
