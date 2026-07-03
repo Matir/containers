@@ -27,4 +27,8 @@ if [ -f "$SKEL_SCRIPT" ]; then
     gosu "$TARGET_USER" bash "$SKEL_SCRIPT"
 fi
 
+if [ "$#" -eq 0 ]; then
+    exec gosu "$TARGET_USER" sleep infinity
+fi
+
 exec gosu "$TARGET_USER" "$@"
