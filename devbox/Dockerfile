@@ -18,9 +18,11 @@ RUN apt-get update && \
       | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
     chmod 644 /etc/apt/keyrings/cloud.google.gpg /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl -fsSL https://download.opensuse.org/repositories/home:RizinOrg/Debian_Unstable/Release.key | gpg --dearmor -o /etc/apt/keyrings/rizinorg.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/rizinorg.gpg] http://download.opensuse.org/repositories/home:/RizinOrg/Debian_Unstable/ /" \
-      | tee /etc/apt/sources.list.d/rizinorg.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/rizinorg.gpg] http://download.opensuse.org/repositories/home:/RizinOrg/Debian_Unstable/ /" > /etc/apt/sources.list.d/rizinorg.list && \
     chmod 644 /etc/apt/keyrings/rizinorg.gpg /etc/apt/sources.list.d/rizinorg.list && \
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg > /etc/apt/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list && \
+    chmod 644 /etc/apt/keyrings/githubcli-archive-keyring.gpg /etc/apt/sources.list.d/github-cli.list && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     # Shells
