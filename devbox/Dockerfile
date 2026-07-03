@@ -34,7 +34,7 @@ RUN apt-get update && \
     # Core utilities
     git git-lfs git-delta \
     less sudo locales gnupg ca-certificates curl wget pkg-config \
-    file zip unzip rsync \
+    file zip unzip rsync tini \
     openssh-client \
     # Build tools
     build-essential binutils python3 python3-dev python3-pip python3-venv pipx \
@@ -162,5 +162,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /home/${USERNAME}
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/entrypoint.sh"]
 CMD ["/bin/zsh"]

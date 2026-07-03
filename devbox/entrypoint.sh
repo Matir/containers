@@ -28,6 +28,7 @@ if [ -f "$SKEL_SCRIPT" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
+    echo "Entering infinite sleep..."
     exec gosu "$TARGET_USER" sleep infinity
 fi
 
