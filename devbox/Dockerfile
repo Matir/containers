@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:trixie-slim
+FROM docker.io/library/debian:forky-slim
 
 LABEL maintainer="Matir <matir@users.noreply.github.com>" \
       org.opencontainers.image.authors="Matir <matir@users.noreply.github.com>" \
@@ -18,9 +18,11 @@ RUN apt-get update && \
       | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
     chmod 644 /etc/apt/keyrings/cloud.google.gpg /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl -fsSL https://download.opensuse.org/repositories/home:RizinOrg/Debian_Unstable/Release.key | gpg --dearmor -o /etc/apt/keyrings/rizinorg.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/rizinorg.gpg] http://download.opensuse.org/repositories/home:/RizinOrg/Debian_Unstable/ /" \
-      | tee /etc/apt/sources.list.d/rizinorg.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/rizinorg.gpg] http://download.opensuse.org/repositories/home:/RizinOrg/Debian_Unstable/ /" > /etc/apt/sources.list.d/rizinorg.list && \
     chmod 644 /etc/apt/keyrings/rizinorg.gpg /etc/apt/sources.list.d/rizinorg.list && \
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg > /etc/apt/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list && \
+    chmod 644 /etc/apt/keyrings/githubcli-archive-keyring.gpg /etc/apt/sources.list.d/github-cli.list && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     # Shells
@@ -42,7 +44,7 @@ RUN apt-get update && \
     # Debugging
     procps lldb gdb gdb-multiarch strace ltrace lsof valgrind \
     # Reverse engineering / exploit development
-    patchelf python3-ropgadget rizin \
+    patchelf python3-ropgadget rizin mitmproxy \
     # Networking
     net-tools iputils-ping iproute2 dnsutils netcat-openbsd tcpdump socat nmap \
     # Terminal multiplexer
@@ -74,14 +76,6 @@ RUN apt-get update && \
     gosu && \
     npm install -g @anthropic-ai/claude-code && \
     curl -sS https://starship.rs/install.sh | sh -s -- -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install mitmproxy from testing (not yet in trixie/stable)
-RUN echo "deb http://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/debian-testing.list && \
-    printf 'Package: *\nPin: release a=testing\nPin-Priority: 100\n' > /etc/apt/preferences.d/testing-pin && \
-    apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -t testing mitmproxy && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
