@@ -32,15 +32,16 @@ jobs:
           all_images=$(find * -maxdepth 1 -name Dockerfile -print0 | xargs -0 -n1 dirname | grep -v '^\.' | jq -R . | jq -cs .)
           echo "All images: ${all_images}"
 
-          if [[ '${{ github.event_name }}' == 'pull_request' ]]; then
-            # For PRs, find images with changed files in their directories
-            base_ref='${{ github.base_ref }}'
-            head_ref='${{ github.head_ref }}'
-            echo "Comparing ${head_ref} against ${base_ref}"
-
-            # Get changed files compared to base branch
-            changed_files=$(git diff --name-only "origin/${base_ref}"...HEAD 2>/dev/null || git diff --name-only "${base_ref}"...HEAD 2>/dev/null || echo "")
+          detect_changed_images() {
+            local changed_files="$1"
             echo "Changed files: ${changed_files}"
+
+            # If .github itself changed, the build config may have changed — rebuild everything
+            if echo "${changed_files}" | grep -q '^\.github/'; then
+              echo "Build configuration changed, rebuilding all images"
+              echo "images=${all_images}" >> $GITHUB_OUTPUT
+              return
+            fi
 
             # Find images in changed directories, intersected with all_images to exclude
             # dotfiles and directories without a Dockerfile
@@ -48,22 +49,46 @@ jobs:
             changed_images=$(jq -nc --argjson all "${all_images}" --argjson changed "${changed_dirs}" \
               '$changed | map(select(. as $x | $all | index($x)))')
             echo "Changed images: ${changed_images}"
+            echo "images=${changed_images}" >> $GITHUB_OUTPUT
+          }
 
-            # If no changes or all images changed, build all
-            if [[ -z "${changed_files}" ]] || [[ "${changed_images}" == '[]' ]]; then
-              echo "No specific image changes detected, building all images"
+          if [[ '${{ github.event_name }}' == 'pull_request' ]]; then
+            # For PRs, find images with changed files in their directories
+            base_ref='${{ github.base_ref }}'
+            head_ref='${{ github.head_ref }}'
+            echo "Comparing ${head_ref} against ${base_ref}"
+
+            changed_files=$(git diff --name-only "origin/${base_ref}"...HEAD 2>/dev/null || git diff --name-only "${base_ref}"...HEAD 2>/dev/null || echo "")
+
+            if [[ -z "${changed_files}" ]]; then
+              echo "No changes detected, building all images"
               echo "images=${all_images}" >> $GITHUB_OUTPUT
             else
-              echo "images=${changed_images}" >> $GITHUB_OUTPUT
+              detect_changed_images "${changed_files}"
             fi
           else
-            # For push to main, build all images
-            echo "images=${all_images}" >> $GITHUB_OUTPUT
+            # For push to main, diff against the previous HEAD to find what actually changed
+            before='${{ github.event.before }}'
+            if [[ "$before" =~ ^0+$ ]] || ! git rev-parse --verify "${before}" &>/dev/null; then
+              echo "No previous commit reference, building all images"
+              echo "images=${all_images}" >> $GITHUB_OUTPUT
+            else
+              echo "Comparing HEAD against ${before}"
+              changed_files=$(git diff --name-only "${before}" HEAD 2>/dev/null || echo "")
+
+              if [[ -z "${changed_files}" ]]; then
+                echo "No changes detected, skipping all builds"
+                echo "images=[]" >> $GITHUB_OUTPUT
+              else
+                detect_changed_images "${changed_files}"
+              fi
+            fi
           fi
 
   # This job builds and pushes a container image for each of the directories found by the `list-images` job.
   build-and-push-image:
     needs: [list-images]
+    if: ${{ needs.list-images.outputs.images != '[]' }}
     runs-on: ubuntu-latest
     continue-on-error: true
     # This strategy creates a parallel build for each image, which speeds up the overall workflow.
