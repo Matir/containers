@@ -4,7 +4,7 @@ LABEL maintainer="Matir <matir@users.noreply.github.com>" \
       org.opencontainers.image.authors="Matir <matir@users.noreply.github.com>" \
       org.opencontainers.image.base.name="docker.io/library/debian:trixie-slim"
 
-# Add Docker CLI and Google Cloud CLI repos, then install everything in one layer
+# Add Docker CLI, Google Cloud CLI, and Rizin (OBS) repos, then install everything in one layer
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates gnupg curl && \
@@ -17,6 +17,10 @@ RUN apt-get update && \
     echo "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
       | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
     chmod 644 /etc/apt/keyrings/cloud.google.gpg /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl -fsSL https://download.opensuse.org/repositories/home:RizinOrg/Debian_Unstable/Release.key | gpg --dearmor -o /etc/apt/keyrings/rizinorg.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/rizinorg.gpg] http://download.opensuse.org/repositories/home:/RizinOrg/Debian_Unstable/ /" \
+      | tee /etc/apt/sources.list.d/rizinorg.list && \
+    chmod 644 /etc/apt/keyrings/rizinorg.gpg /etc/apt/sources.list.d/rizinorg.list && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     # Shells
@@ -38,7 +42,7 @@ RUN apt-get update && \
     # Debugging
     procps lldb gdb gdb-multiarch strace ltrace lsof valgrind \
     # Reverse engineering / exploit development
-    patchelf python3-ropgadget \
+    patchelf python3-ropgadget rizin \
     # Networking
     net-tools iputils-ping iproute2 dnsutils netcat-openbsd tcpdump socat nmap \
     # Terminal multiplexer
