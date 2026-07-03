@@ -38,7 +38,7 @@ RUN apt-get update && \
     # Debugging
     procps lldb gdb gdb-multiarch strace ltrace lsof valgrind \
     # Reverse engineering / exploit development
-    radare2 patchelf python3-ropgadget \
+    patchelf python3-ropgadget \
     # Networking
     net-tools iputils-ping iproute2 dnsutils netcat-openbsd tcpdump socat nmap \
     # Terminal multiplexer
