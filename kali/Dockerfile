@@ -9,7 +9,7 @@ ARG USER_NAME=matir
 ENV USER_NAME=$USER_NAME
 
 # Update system and install apt packages
-# Includes python3, pip, nodejs/npm (for gemini-cli/opencode), and kali-linux-headless
+# Includes python3, pip, nodejs/npm (for opencode/claude-code), and kali-linux-headless
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
@@ -51,8 +51,11 @@ ENV PATH="/usr/local/bin:$PATH"
 # Install starship (Cross-shell prompt)
 RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
 
-# Install gemini-cli, opencode, and kilocode via npm
-RUN npm install -g @google/gemini-cli opencode-ai @kilocode/cli
+# Install opencode, kilocode, and Claude Code via npm
+RUN npm install -g opencode-ai @kilocode/cli @anthropic-ai/claude-code
+
+# Install Google Antigravity CLI
+RUN curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- -d /usr/local/bin
 
 # Install other tools
 RUN r2pm -U && r2pm -i r2mcp
