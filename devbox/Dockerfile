@@ -32,7 +32,7 @@ RUN apt-get update && \
     # Editors
     vim neovim \
     # Core utilities
-    git git-lfs git-delta \
+    git git-lfs \
     less sudo locales gnupg ca-certificates curl wget pkg-config \
     file zip unzip rsync tini \
     openssh-client \
