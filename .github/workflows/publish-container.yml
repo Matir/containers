@@ -116,7 +116,7 @@ jobs:
 
       - name: Log in to the Container registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/login-action@17f7c1809f7467d4244b4ff01b0dbe0b8b9e3d43
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -128,7 +128,7 @@ jobs:
           echo "namedtag=$(cat ./${{ matrix.image }}/.tag 2>/dev/null || true)" >> $GITHUB_OUTPUT
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@45b191481076e80d5734fec83fc5b651df3537cc
+        uses: docker/metadata-action@703896b4f30f62d53f5530a80bcdc589a3f702bc
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}/${{ matrix.image }}
           tags: |
@@ -140,7 +140,7 @@ jobs:
             type=ref,event=pr
       - name: Build and push Docker image
         id: build-push
-        uses: docker/build-push-action@b99c92828ab902cd2c54088e778f547a66bf746f
+        uses: docker/build-push-action@cb941d0b895b09c17fa011d41c411b33c752cf28
         with:
           context: ${{ matrix.image }}
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
