@@ -140,7 +140,7 @@ jobs:
             type=ref,event=pr
       - name: Build and push Docker image
         id: build-push
-        uses: docker/build-push-action@cb941d0b895b09c17fa011d41c411b33c752cf28
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: ${{ matrix.image }}
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
